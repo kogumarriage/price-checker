@@ -10,7 +10,6 @@ body {
   font-family: -apple-system, BlinkMacSystemFont;
   background: #f5f6fa;
   margin: 0;
-  padding: 0;
 }
 
 .container {
@@ -21,7 +20,6 @@ body {
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .card {
@@ -29,10 +27,9 @@ h1 {
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-input {
+input, select {
   width: 100%;
   padding: 12px;
   margin-top: 8px;
@@ -50,11 +47,6 @@ button {
   border: none;
   border-radius: 10px;
   font-size: 18px;
-  font-weight: bold;
-}
-
-button:active {
-  transform: scale(0.98);
 }
 
 .result {
@@ -63,7 +55,6 @@ button:active {
   padding: 15px;
   border-radius: 12px;
   text-align: center;
-  font-size: 18px;
 }
 </style>
 
@@ -77,12 +68,26 @@ button:active {
 <div class="card">
 <h3>商品A</h3>
 <input type="number" id="aQty" placeholder="数量">
+<select id="aUnit">
+<option value="1">個</option>
+<option value="1">g</option>
+<option value="1000">kg</option>
+<option value="1">ml</option>
+<option value="1000">L</option>
+</select>
 <input type="number" id="aPrice" placeholder="価格">
 </div>
 
 <div class="card">
 <h3>商品B</h3>
 <input type="number" id="bQty" placeholder="数量">
+<select id="bUnit">
+<option value="1">個</option>
+<option value="1">g</option>
+<option value="1000">kg</option>
+<option value="1">ml</option>
+<option value="1000">L</option>
+</select>
 <input type="number" id="bPrice" placeholder="価格">
 </div>
 
@@ -93,14 +98,21 @@ button:active {
 </div>
 
 <script>
+function calc(price, qty, unit) {
+  return price / (qty * unit);
+}
+
 function compare() {
   const aQty = document.getElementById("aQty").value;
+  const aUnit = document.getElementById("aUnit").value;
   const aPrice = document.getElementById("aPrice").value;
+
   const bQty = document.getElementById("bQty").value;
+  const bUnit = document.getElementById("bUnit").value;
   const bPrice = document.getElementById("bPrice").value;
 
-  const a = aPrice / aQty;
-  const b = bPrice / bQty;
+  const a = calc(aPrice, aQty, aUnit);
+  const b = calc(bPrice, bQty, bUnit);
 
   let result = "";
 
