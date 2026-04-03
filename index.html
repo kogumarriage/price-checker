@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>単価比較アプリ</title>
+
+<!-- アイコン -->
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+
+<!-- テーマカラー -->
+<meta name="theme-color" content="#ff7f50">
 
 <style>
 body {
@@ -63,6 +71,7 @@ button:active {
 }
 
 .result {
+  display: none; /* ← 白枠対策 */
   margin-top: 20px;
   background: white;
   padding: 18px;
@@ -78,8 +87,8 @@ button:active {
   margin-top: 10px;
 }
 </style>
-
 </head>
+
 <body>
 
 <div class="container">
@@ -137,6 +146,7 @@ function compare() {
   const bPrice = document.getElementById("bPrice").value;
 
   if (!aQty || !aPrice || !bQty || !bPrice) {
+    document.getElementById("result").style.display = "block";
     document.getElementById("result").innerHTML = "⚠️ 入力してください";
     return;
   }
@@ -156,6 +166,8 @@ function compare() {
     winner = "同じ価格";
   }
 
+  document.getElementById("result").style.display = "block";
+
   document.getElementById("result").innerHTML =
     `
     A：${a.toFixed(2)} 円<br>
@@ -168,6 +180,6 @@ function compare() {
     `;
 }
 </script>
-document.getElementById("result").style.display = "block";
+
 </body>
 </html>
