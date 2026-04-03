@@ -182,26 +182,8 @@ function per100(price, qty, unit) {
 }
 
 function compare() {
-  const aPriceVal = Number(aPrice.value);
-const aQtyVal = Number(aQty.value);
-const aUnitVal = Number(aUnit.value);
-
-const bPriceVal = Number(bPrice.value);
-const bQtyVal = Number(bQty.value);
-const bUnitVal = Number(bUnit.value);
-
-// 入力チェック
-if (!aPriceVal || !aQtyVal || !bPriceVal || !bQtyVal) {
-  result.style.display = "block";
-  result.innerHTML = "⚠️ 数値を入力してください";
-  return;
-}
-
-const a = calc(aPriceVal, aQtyVal, aUnitVal);
-const b = calc(bPriceVal, bQtyVal, bUnitVal);
-
-const diff = Math.abs(a - b);
-const percent = (diff / Math.max(a, b)) * 100;
+  const a = calc(aPrice.value, aQty.value, aUnit.value);
+  const b = calc(bPrice.value, bQty.value, bUnit.value);
 
   const diff = Math.abs(a - b);
   const percent = (diff / Math.max(a, b)) * 100;
@@ -211,10 +193,10 @@ const percent = (diff / Math.max(a, b)) * 100;
 
   if (a < b) {
     message = `商品Aが約 ${percent.toFixed(1)}% お得`;
-    kumaMsg = "Aのほうがいいね🐻";
+    kumaMsg = "Aのほうがいいくま🐻";
   } else {
     message = `商品Bが約 ${percent.toFixed(1)}% お得`;
-    kumaMsg = "Bがおすすめだよ🐻";
+    kumaMsg = "Bがおすすめくま🐻";
   }
 
   result.style.display = "block";
