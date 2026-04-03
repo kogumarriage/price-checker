@@ -37,6 +37,7 @@ input, select {
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 16px;
+  box-sizing: border-box; /* ←これが修正ポイント */
 }
 
 button {
@@ -102,6 +103,12 @@ function calc(price, qty, unit) {
   return price / (qty * unit);
 }
 
+function per100g(price, qty, unit) {
+  const gram = qty * unit;
+  if (gram === 0) return 0;
+  return (price / gram) * 100;
+}
+
 function compare() {
   const aQty = document.getElementById("aQty").value;
   const aUnit = document.getElementById("aUnit").value;
@@ -111,8 +118,17 @@ function compare() {
   const bUnit = document.getElementById("bUnit").value;
   const bPrice = document.getElementById("bPrice").value;
 
+  // 入力チェック
+  if (!aQty || !aPrice || !bQty || !bPrice) {
+    document.getElementById("result").innerHTML = "⚠️ すべて入力してください";
+    return;
+  }
+
   const a = calc(aPrice, aQty, aUnit);
   const b = calc(bPrice, bQty, bUnit);
+
+  const a100 = per100g(aPrice, aQty, aUnit);
+  const b100 = per100g(bPrice, bQty, bUnit);
 
   let result = "";
 
@@ -130,10 +146,15 @@ function compare() {
   document.getElementById("result").innerHTML =
     `
     A単価：${a.toFixed(2)} 円<br>
-    B単価：${b.toFixed(2)} 円<br>
+    B単価：${b.toFixed(2)} 円<br><br>
+
+    A（100gあたり）：${a100.toFixed(1)} 円<br>
+    B（100gあたり）：${b100.toFixed(1)} 円<br><br>
+
     差額：${diff.toFixed(2)} 円<br>
     お得率：約 ${percent.toFixed(1)} %<br><br>
-    ${result}
+
+    <b>${result}</b>
     `;
 }
 </script>
