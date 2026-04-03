@@ -4,23 +4,93 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>単価比較アプリ</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont;
+  background: #f5f6fa;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background: #ff7f50;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.result {
+  margin-top: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 18px;
+}
+</style>
+
 </head>
 <body>
 
-<h2>単価比較アプリ</h2>
+<div class="container">
 
+<h1>単価比較</h1>
+
+<div class="card">
 <h3>商品A</h3>
 <input type="number" id="aQty" placeholder="数量">
 <input type="number" id="aPrice" placeholder="価格">
+</div>
 
+<div class="card">
 <h3>商品B</h3>
 <input type="number" id="bQty" placeholder="数量">
 <input type="number" id="bPrice" placeholder="価格">
+</div>
 
-<br><br>
 <button onclick="compare()">比較する</button>
 
-<div id="result"></div>
+<div class="result" id="result"></div>
+
+</div>
 
 <script>
 function compare() {
@@ -35,15 +105,24 @@ function compare() {
   let result = "";
 
   if (a < b) {
-    result = "商品Aの方が安い";
+    result = "👉 商品Aの方が安い";
+  } else if (b < a) {
+    result = "👉 商品Bの方が安い";
   } else {
-    result = "商品Bの方が安い";
+    result = "👉 同じ価格";
   }
 
+  const diff = Math.abs(a - b);
+  const percent = (diff / Math.max(a, b)) * 100;
+
   document.getElementById("result").innerHTML =
-    "A単価：" + a.toFixed(2) + "円<br>" +
-    "B単価：" + b.toFixed(2) + "円<br><br>" +
-    result;
+    `
+    A単価：${a.toFixed(2)} 円<br>
+    B単価：${b.toFixed(2)} 円<br>
+    差額：${diff.toFixed(2)} 円<br>
+    お得率：約 ${percent.toFixed(1)} %<br><br>
+    ${result}
+    `;
 }
 </script>
 
