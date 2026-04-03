@@ -2,17 +2,27 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>単価比較アプリ</title>
+<!-- iPhone最適化 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ff7f9f">
+
+<title>こぐまりっじ お買い物比較</title>
+
+<!-- アイコン -->
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2"></script>
 
 <style>
 body {
-  font-family: sans-serif;
-  background: linear-gradient(135deg, #ffe4e1, #fff5f5);
+  font-family: -apple-system, BlinkMacSystemFont;
+  background: linear-gradient(135deg, #ffe4ec, #fff6f9);
   margin: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .container {
@@ -30,29 +40,33 @@ h1 {
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.1);
 }
 
-input, select, button {
+input, select {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   margin-bottom: 10px;
   border-radius: 10px;
   border: 1px solid #ddd;
   box-sizing: border-box;
+  font-size: 16px;
 }
 
 button {
-  background: #ff7f7f;
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff7f9f, #ffb6c1);
   color: white;
-  font-weight: bold;
   border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  -webkit-tap-highlight-color: transparent;
 }
 
-video {
-  width: 100%;
-  border-radius: 10px;
-  display: none;
+button:active {
+  transform: scale(0.97);
 }
 
 .result {
@@ -68,6 +82,16 @@ video {
   color: #ff4d6d;
   font-weight: bold;
 }
+
+.kuma {
+  font-size: 40px;
+}
+
+video {
+  width: 100%;
+  border-radius: 10px;
+  display: none;
+}
 </style>
 </head>
 
@@ -75,7 +99,7 @@ video {
 
 <div class="container">
 
-<h1>🧸 お買い物比較</h1>
+<h1>🧸 こぐまりっじ比較</h1>
 
 <div class="card">
 <h3>商品A</h3>
@@ -84,10 +108,11 @@ video {
 <option value="1">個</option>
 <option value="1">g</option>
 <option value="1000">kg</option>
+<option value="1">ml</option>
+<option value="1000">L</option>
 </select>
-<input id="aPrice" placeholder="価格">
-
-<button onclick="startCamera('a')">📷 価格を撮影</button>
+<input id="aPrice" placeholder="価格（円）">
+<button onclick="startCamera('a')">📷 撮影</button>
 </div>
 
 <div class="card">
@@ -97,10 +122,11 @@ video {
 <option value="1">個</option>
 <option value="1">g</option>
 <option value="1000">kg</option>
+<option value="1">ml</option>
+<option value="1000">L</option>
 </select>
-<input id="bPrice" placeholder="価格">
-
-<button onclick="startCamera('b')">📷 価格を撮影</button>
+<input id="bPrice" placeholder="価格（円）">
+<button onclick="startCamera('b')">📷 撮影</button>
 </div>
 
 <video id="camera" autoplay></video>
@@ -118,48 +144,41 @@ let stream;
 
 function startCamera(target) {
   currentTarget = target;
-
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(s => {
       stream = s;
-      const video = document.getElementById("camera");
-      video.style.display = "block";
-      video.srcObject = s;
-      document.getElementById("captureBtn").style.display = "block";
+      camera.style.display = "block";
+      camera.srcObject = s;
+      captureBtn.style.display = "block";
     })
-    .catch(() => {
-      alert("カメラが使えません");
-    });
+    .catch(() => alert("カメラが使えません"));
 }
 
 function capture() {
-  const video = document.getElementById("camera");
-
   const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  canvas.width = camera.videoWidth;
+  canvas.height = camera.videoHeight;
 
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0);
+  canvas.getContext("2d").drawImage(camera, 0, 0);
 
   Tesseract.recognize(canvas, 'eng').then(({ data: { text } }) => {
-    const numbers = text.match(/\d+/g);
-
-    if (numbers) {
-      document.getElementById(currentTarget + "Price").value = numbers[0];
-    } else {
-      alert("読み取れませんでした");
+    const nums = text.match(/\d+/g);
+    if (nums) {
+      document.getElementById(currentTarget + "Price").value = nums[0];
     }
   });
 
-  // カメラ停止
   stream.getTracks().forEach(track => track.stop());
-  document.getElementById("camera").style.display = "none";
-  document.getElementById("captureBtn").style.display = "none";
+  camera.style.display = "none";
+  captureBtn.style.display = "none";
 }
 
 function calc(price, qty, unit) {
   return price / (qty * unit);
+}
+
+function per100(price, qty, unit) {
+  return (price / (qty * unit)) * 100;
 }
 
 function compare() {
@@ -169,26 +188,33 @@ function compare() {
   const diff = Math.abs(a - b);
   const percent = (diff / Math.max(a, b)) * 100;
 
-  let winner = "";
+  let message = "";
+  let kumaMsg = "";
 
   if (a < b) {
-    winner = `👉 商品Aが約 ${percent.toFixed(1)}% お得`;
+    message = `商品Aが約 ${percent.toFixed(1)}% お得`;
+    kumaMsg = "Aのほうがいいくま🐻";
   } else {
-    winner = `👉 商品Bが約 ${percent.toFixed(1)}% お得`;
+    message = `商品Bが約 ${percent.toFixed(1)}% お得`;
+    kumaMsg = "Bがおすすめくま🐻";
   }
 
-  const resultBox = document.getElementById("result");
-  resultBox.style.display = "block";
+  result.style.display = "block";
 
-  resultBox.innerHTML =
-    `
+  result.innerHTML = `
+    <div class="kuma">🧸🎩</div><br>
+
     A単価：${a.toFixed(2)} 円<br>
     B単価：${b.toFixed(2)} 円<br><br>
 
+    A（100g）：${per100(aPrice.value, aQty.value, aUnit.value).toFixed(1)} 円<br>
+    B（100g）：${per100(bPrice.value, bQty.value, bUnit.value).toFixed(1)} 円<br><br>
+
     差額：${diff.toFixed(2)} 円<br><br>
 
-    <div class="highlight">${winner}</div>
-    `;
+    <div class="highlight">${message}</div><br>
+    ${kumaMsg}
+  `;
 }
 </script>
 
