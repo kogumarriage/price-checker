@@ -7,55 +7,75 @@
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont;
-  background: #f5f6fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #eef2f7, #dfe9f3);
   margin: 0;
 }
 
 .container {
-  max-width: 400px;
+  max-width: 420px;
   margin: auto;
   padding: 20px;
 }
 
 h1 {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .card {
   background: white;
-  padding: 15px;
+  padding: 16px;
   margin-bottom: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+
+h3 {
+  margin-bottom: 10px;
 }
 
 input, select {
   width: 100%;
-  padding: 12px;
-  margin-top: 8px;
+  padding: 14px;
   margin-bottom: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #ddd;
   font-size: 16px;
-  box-sizing: border-box; /* ←これが修正ポイント */
+  box-sizing: border-box;
 }
 
 button {
   width: 100%;
-  padding: 15px;
-  background: #ff7f50;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff7f50, #ff9966);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(255,127,80,0.4);
+  transition: 0.2s;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 .result {
   margin-top: 20px;
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
+  background: white;
+  padding: 18px;
+  border-radius: 16px;
   text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+}
+
+.highlight {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff7f50;
+  margin-top: 10px;
 }
 </style>
 
@@ -64,7 +84,7 @@ button {
 
 <div class="container">
 
-<h1>単価比較</h1>
+<h1>🛒 単価比較</h1>
 
 <div class="card">
 <h3>商品A</h3>
@@ -76,7 +96,7 @@ button {
 <option value="1">ml</option>
 <option value="1000">L</option>
 </select>
-<input type="number" id="aPrice" placeholder="価格">
+<input type="number" id="aPrice" placeholder="価格（円）">
 </div>
 
 <div class="card">
@@ -89,7 +109,7 @@ button {
 <option value="1">ml</option>
 <option value="1000">L</option>
 </select>
-<input type="number" id="bPrice" placeholder="価格">
+<input type="number" id="bPrice" placeholder="価格（円）">
 </div>
 
 <button onclick="compare()">比較する</button>
@@ -104,9 +124,7 @@ function calc(price, qty, unit) {
 }
 
 function per100g(price, qty, unit) {
-  const gram = qty * unit;
-  if (gram === 0) return 0;
-  return (price / gram) * 100;
+  return (price / (qty * unit)) * 100;
 }
 
 function compare() {
@@ -118,9 +136,8 @@ function compare() {
   const bUnit = document.getElementById("bUnit").value;
   const bPrice = document.getElementById("bPrice").value;
 
-  // 入力チェック
   if (!aQty || !aPrice || !bQty || !bPrice) {
-    document.getElementById("result").innerHTML = "⚠️ すべて入力してください";
+    document.getElementById("result").innerHTML = "⚠️ 入力してください";
     return;
   }
 
@@ -130,31 +147,24 @@ function compare() {
   const a100 = per100g(aPrice, aQty, aUnit);
   const b100 = per100g(bPrice, bQty, bUnit);
 
-  let result = "";
-
+  let winner = "";
   if (a < b) {
-    result = "👉 商品Aの方が安い";
+    winner = "商品Aの方がお得";
   } else if (b < a) {
-    result = "👉 商品Bの方が安い";
+    winner = "商品Bの方がお得";
   } else {
-    result = "👉 同じ価格";
+    winner = "同じ価格";
   }
-
-  const diff = Math.abs(a - b);
-  const percent = (diff / Math.max(a, b)) * 100;
 
   document.getElementById("result").innerHTML =
     `
-    A単価：${a.toFixed(2)} 円<br>
-    B単価：${b.toFixed(2)} 円<br><br>
+    A：${a.toFixed(2)} 円<br>
+    B：${b.toFixed(2)} 円<br><br>
 
-    A（100gあたり）：${a100.toFixed(1)} 円<br>
-    B（100gあたり）：${b100.toFixed(1)} 円<br><br>
+    A（100g）：${a100.toFixed(1)} 円<br>
+    B（100g）：${b100.toFixed(1)} 円<br><br>
 
-    差額：${diff.toFixed(2)} 円<br>
-    お得率：約 ${percent.toFixed(1)} %<br><br>
-
-    <b>${result}</b>
+    <div class="highlight">${winner}</div>
     `;
 }
 </script>
