@@ -1,189 +1,20 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-
-<!-- iPhone最適化 -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ff7f9f">
-
-<title>こぐまりっじ お買い物比較</title>
-
-<!-- アイコン -->
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2"></script>
-
-<style>
-body {
-  font-family: -apple-system, BlinkMacSystemFont;
-  background: linear-gradient(135deg, #ffe4ec, #fff6f9);
-  margin: 0;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-}
-
-h1 {
-  text-align: center;
-}
-
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 16px;
-  box-shadow: 0 5px 12px rgba(0,0,0,0.1);
-}
-
-input, select {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-sizing: border-box;
-  font-size: 16px;
-}
-
-button {
-  width: 100%;
-  padding: 15px;
-  background: linear-gradient(135deg, #ff7f9f, #ffb6c1);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-.result {
-  display: none;
-  background: white;
-  padding: 15px;
-  border-radius: 16px;
-  text-align: center;
-}
-
-.highlight {
-  font-size: 20px;
-  color: #ff4d6d;
-  font-weight: bold;
-}
-
-.kuma {
-  font-size: 40px;
-}
-
-video {
-  width: 100%;
-  border-radius: 10px;
-  display: none;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>🧸 こぐまりっじ比較</h1>
-
-<div class="card">
-<h3>商品A</h3>
-<input id="aQty" placeholder="数量">
-<select id="aUnit">
-<option value="1">個</option>
-<option value="1">g</option>
-<option value="1000">kg</option>
-<option value="1">ml</option>
-<option value="1000">L</option>
-</select>
-<input id="aPrice" placeholder="価格（円）">
-<button onclick="startCamera('a')">📷 撮影</button>
-</div>
-
-<div class="card">
-<h3>商品B</h3>
-<input id="bQty" placeholder="数量">
-<select id="bUnit">
-<option value="1">個</option>
-<option value="1">g</option>
-<option value="1000">kg</option>
-<option value="1">ml</option>
-<option value="1000">L</option>
-</select>
-<input id="bPrice" placeholder="価格（円）">
-<button onclick="startCamera('b')">📷 撮影</button>
-</div>
-
-<video id="camera" autoplay></video>
-<button id="captureBtn" onclick="capture()" style="display:none;">📸 撮影する</button>
-
-<button onclick="compare()">比較する</button>
-
-<div id="result" class="result"></div>
-
-</div>
-
-<script>
-let currentTarget = "";
-let stream;
-
-function startCamera(target) {
-  currentTarget = target;
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(s => {
-      stream = s;
-      camera.style.display = "block";
-      camera.srcObject = s;
-      captureBtn.style.display = "block";
-    })
-    .catch(() => alert("カメラが使えません"));
-}
-
-function capture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = camera.videoWidth;
-  canvas.height = camera.videoHeight;
-
-  canvas.getContext("2d").drawImage(camera, 0, 0);
-
-  Tesseract.recognize(canvas, 'eng').then(({ data: { text } }) => {
-    const nums = text.match(/\d+/g);
-    if (nums) {
-      document.getElementById(currentTarget + "Price").value = nums[0];
-    }
-  });
-
-  stream.getTracks().forEach(track => track.stop());
-  camera.style.display = "none";
-  captureBtn.style.display = "none";
-}
-
-function calc(price, qty, unit) {
-  return price / (qty * unit);
-}
-
-function per100(price, qty, unit) {
-  return (price / (qty * unit)) * 100;
-}
-
 function compare() {
-  const a = calc(aPrice.value, aQty.value, aUnit.value);
-  const b = calc(bPrice.value, bQty.value, bUnit.value);
+  const aPriceVal = Number(aPrice.value);
+  const aQtyVal = Number(aQty.value);
+  const aUnitVal = Number(aUnit.value);
+
+  const bPriceVal = Number(bPrice.value);
+  const bQtyVal = Number(bQty.value);
+  const bUnitVal = Number(bUnit.value);
+
+  if (!aPriceVal || !aQtyVal || !bPriceVal || !bQtyVal) {
+    result.style.display = "block";
+    result.innerHTML = "⚠️ 数値を入力してください";
+    return;
+  }
+
+  const a = calc(aPriceVal, aQtyVal, aUnitVal);
+  const b = calc(bPriceVal, bQtyVal, bUnitVal);
 
   const diff = Math.abs(a - b);
   const percent = (diff / Math.max(a, b)) * 100;
@@ -196,7 +27,7 @@ function compare() {
     kumaMsg = "Aのほうがいいくま🐻";
   } else {
     message = `商品Bが約 ${percent.toFixed(1)}% お得`;
-    kumaMsg = "Bがおすすめくま🐻";
+    kumaMsg = "Bがおすすめです🐻";
   }
 
   result.style.display = "block";
@@ -207,8 +38,8 @@ function compare() {
     A単価：${a.toFixed(2)} 円<br>
     B単価：${b.toFixed(2)} 円<br><br>
 
-    A（100g）：${per100(aPrice.value, aQty.value, aUnit.value).toFixed(1)} 円<br>
-    B（100g）：${per100(bPrice.value, bQty.value, bUnit.value).toFixed(1)} 円<br><br>
+    A（100g）：${per100(aPriceVal, aQtyVal, aUnitVal).toFixed(1)} 円<br>
+    B（100g）：${per100(bPriceVal, bQtyVal, bUnitVal).toFixed(1)} 円<br><br>
 
     差額：${diff.toFixed(2)} 円<br><br>
 
@@ -216,7 +47,3 @@ function compare() {
     ${kumaMsg}
   `;
 }
-</script>
-
-</body>
-</html>
