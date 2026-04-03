@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>単価比較アプリ</title>
-<style>
-body { font-family: sans-serif; padding: 20px; }
-input, select { margin: 5px; padding: 5px; }
-.result { margin-top: 20px; font-size: 18px; }
-</style>
 </head>
 <body>
 
@@ -16,69 +11,39 @@ input, select { margin: 5px; padding: 5px; }
 
 <h3>商品A</h3>
 <input type="number" id="aQty" placeholder="数量">
-<select id="aUnit">
-<option value="1">個</option>
-<option value="1000">kg</option>
-<option value="1">g</option>
-<option value="1000">L</option>
-<option value="1">ml</option>
-</select>
 <input type="number" id="aPrice" placeholder="価格">
 
 <h3>商品B</h3>
 <input type="number" id="bQty" placeholder="数量">
-<select id="bUnit">
-<option value="1">個</option>
-<option value="1000">kg</option>
-<option value="1">g</option>
-<option value="1000">L</option>
-<option value="1">ml</option>
-</select>
 <input type="number" id="bPrice" placeholder="価格">
 
 <br><br>
 <button onclick="compare()">比較する</button>
 
-<div class="result" id="result"></div>
+<div id="result"></div>
 
 <script>
-function calc(price, qty, unit) {
-  return price / (qty * unit);
-}
-
 function compare() {
-  const aQty = parseFloat(document.getElementById("aQty").value);
-  const aUnit = parseFloat(document.getElementById("aUnit").value);
-  const aPrice = parseFloat(document.getElementById("aPrice").value);
+  const aQty = document.getElementById("aQty").value;
+  const aPrice = document.getElementById("aPrice").value;
+  const bQty = document.getElementById("bQty").value;
+  const bPrice = document.getElementById("bPrice").value;
 
-  const bQty = parseFloat(document.getElementById("bQty").value);
-  const bUnit = parseFloat(document.getElementById("bUnit").value);
-  const bPrice = parseFloat(document.getElementById("bPrice").value);
-
-  const a = calc(aPrice, aQty, aUnit);
-  const b = calc(bPrice, bQty, bUnit);
+  const a = aPrice / aQty;
+  const b = bPrice / bQty;
 
   let result = "";
 
   if (a < b) {
-    result = "👉 商品Aの方が安い";
-  } else if (b < a) {
-    result = "👉 商品Bの方が安い";
+    result = "商品Aの方が安い";
   } else {
-    result = "👉 同じ価格";
+    result = "商品Bの方が安い";
   }
 
-  const diff = Math.abs(a - b);
-  const percent = (diff / Math.max(a, b)) * 100;
-
   document.getElementById("result").innerHTML =
-    `
-    A単価：${a.toFixed(2)} 円<br>
-    B単価：${b.toFixed(2)} 円<br>
-    差額：${diff.toFixed(2)} 円<br>
-    お得率：約 ${percent.toFixed(1)} %<br><br>
-    ${result}
-    `;
+    "A単価：" + a.toFixed(2) + "円<br>" +
+    "B単価：" + b.toFixed(2) + "円<br><br>" +
+    result;
 }
 </script>
 
