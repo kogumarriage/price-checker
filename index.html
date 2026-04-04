@@ -144,7 +144,9 @@ let stream;
 
 function startCamera(target) {
   currentTarget = target;
-  navigator.mediaDevices.getUserMedia({ video: true })
+  navigator.mediaDevices.getUserMedia({
+  video: { facingMode: { exact: "environment" } }
+})
     .then(s => {
       stream = s;
       camera.style.display = "block";
