@@ -19,7 +19,6 @@ body {
   font-family: -apple-system;
   background: linear-gradient(135deg, #ffe4ec, #fff6f9);
   margin: 0;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .container {
@@ -63,12 +62,6 @@ button {
   padding: 20px;
   border-radius: 16px;
   text-align: center;
-  animation: pop 0.3s ease;
-}
-
-@keyframes pop {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
 }
 
 .big-result {
@@ -87,14 +80,8 @@ button {
   font-size: 18px;
 }
 
-/* 勝者カラー */
-.winA {
-  color: #ff2d55;
-}
-
-.winB {
-  color: #2d6cff;
-}
+.winA { color: #ff2d55; }
+.winB { color: #2d6cff; }
 
 .kuma {
   font-size: 42px;
@@ -159,8 +146,7 @@ function startCamera(target) {
   currentTarget = target;
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" }
-  })
-  .then(s => {
+  }).then(s => {
     stream = s;
     camera.style.display = "block";
     camera.srcObject = s;
@@ -208,8 +194,21 @@ function compare() {
   const a = calc(aPriceVal, aQtyVal, aUnitVal);
   const b = calc(bPriceVal, bQtyVal, bUnitVal);
 
-  const diff = Math.abs(a - b);
-  const percent = (diff / Math.max(a, b)) * 100;
+  const rawDiff = Math.abs(a - b);
+  const percent = (rawDiff / Math.max(a, b)) * 100;
+
+  // ★ 完全一致判定（誤差対応）
+  if (rawDiff < 0.0001) {
+    result.style.display = "block";
+    result.innerHTML = `
+      <div class="kuma">🧸🎩</div>
+      <div class="big-result">🤝 ほぼ同じ価格です</div>
+    `;
+    return;
+  }
+
+  // ★ 表示用差額（最低0.01円）
+  let displayDiff = rawDiff < 0.01 ? 0.01 : rawDiff;
 
   let message = "";
   let priceDiffText = "";
@@ -217,11 +216,11 @@ function compare() {
 
   if (a < b) {
     message = "🔥 商品Aが圧倒的にお得！";
-    priceDiffText = `👉 Bより ${diff.toFixed(0)}円 安い`;
+    priceDiffText = `👉 Bより ${displayDiff.toFixed(2)}円/単位 安い`;
     winClass = "winA";
   } else {
     message = "🔥 商品Bが圧倒的にお得！";
-    priceDiffText = `👉 Aより ${diff.toFixed(0)}円 安い`;
+    priceDiffText = `👉 Aより ${displayDiff.toFixed(2)}円/単位 安い`;
     winClass = "winB";
   }
 
