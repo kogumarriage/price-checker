@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- iPhone最適化 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ff7f9f">
 
-<title>こぐまりっじ お買い物比較</title>
+<title>こぐまりっじ比較</title>
 
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
@@ -30,10 +28,6 @@ body {
   padding: 20px;
 }
 
-h1 {
-  text-align: center;
-}
-
 .card {
   background: white;
   padding: 15px;
@@ -49,6 +43,7 @@ input, select {
   border-radius: 10px;
   border: 1px solid #ddd;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 button {
@@ -60,10 +55,6 @@ button {
   border-radius: 12px;
   font-size: 18px;
   font-weight: bold;
-}
-
-button:active {
-  transform: scale(0.97);
 }
 
 .result {
@@ -80,10 +71,29 @@ button:active {
   to { transform: scale(1); opacity: 1; }
 }
 
-.highlight {
-  font-size: 24px;
-  color: #ff4d6d;
+.big-result {
+  font-size: 30px;
   font-weight: bold;
+  margin: 10px 0;
+}
+
+.price-diff {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.percent {
+  font-size: 18px;
+}
+
+/* 勝者カラー */
+.winA {
+  color: #ff2d55;
+}
+
+.winB {
+  color: #2d6cff;
 }
 
 .kuma {
@@ -102,7 +112,7 @@ video {
 
 <div class="container">
 
-<h1>🧸 こぐまりっじ比較</h1>
+<h2>🧸 こぐまりっじ比較</h2>
 
 <div class="card">
 <h3>商品A</h3>
@@ -133,7 +143,7 @@ video {
 </div>
 
 <video id="camera" autoplay></video>
-<button id="captureBtn" onclick="capture()" style="display:none;">📸 撮影する</button>
+<button id="captureBtn" onclick="capture()" style="display:none;">📸 撮影</button>
 
 <button onclick="compare()">比較する</button>
 
@@ -155,15 +165,13 @@ function startCamera(target) {
     camera.style.display = "block";
     camera.srcObject = s;
     captureBtn.style.display = "block";
-  })
-  .catch(() => alert("カメラが使えません"));
+  });
 }
 
 function capture() {
   const canvas = document.createElement("canvas");
   canvas.width = camera.videoWidth;
   canvas.height = camera.videoHeight;
-
   canvas.getContext("2d").drawImage(camera, 0, 0);
 
   Tesseract.recognize(canvas, 'eng').then(({ data: { text } }) => {
@@ -180,10 +188,6 @@ function capture() {
 
 function calc(price, qty, unit) {
   return price / (qty * unit);
-}
-
-function per100(price, qty, unit) {
-  return (price / (qty * unit)) * 100;
 }
 
 function compare() {
@@ -208,14 +212,17 @@ function compare() {
   const percent = (diff / Math.max(a, b)) * 100;
 
   let message = "";
-  let kumaMsg = "";
+  let priceDiffText = "";
+  let winClass = "";
 
   if (a < b) {
-    message = "商品Aが圧倒的にお得！";
-    kumaMsg = "Aに決まりくま🐻";
+    message = "🔥 商品Aが圧倒的にお得！";
+    priceDiffText = `👉 Bより ${diff.toFixed(0)}円 安い`;
+    winClass = "winA";
   } else {
-    message = "商品Bが圧倒的にお得！";
-    kumaMsg = "Bがおすすめくま🐻";
+    message = "🔥 商品Bが圧倒的にお得！";
+    priceDiffText = `👉 Aより ${diff.toFixed(0)}円 安い`;
+    winClass = "winB";
   }
 
   result.style.display = "block";
@@ -223,23 +230,16 @@ function compare() {
   result.innerHTML = `
     <div class="kuma">🧸🎩</div>
 
-    <div class="highlight">
-      🔥 ${message}
+    <div class="big-result ${winClass}">
+      ${message}
     </div>
 
-    <div style="font-size:18px; margin:10px 0;">
-      👉 ${diff.toFixed(0)}円 安い<br>
+    <div class="price-diff ${winClass}">
+      ${priceDiffText}
+    </div>
+
+    <div class="percent ${winClass}">
       👉 約 ${percent.toFixed(1)}% お得
-    </div>
-
-    <hr>
-
-    <div style="font-size:14px; color:#666;">
-      A：${a.toFixed(2)} 円 / B：${b.toFixed(2)} 円
-    </div>
-
-    <div style="margin-top:10px;">
-      ${kumaMsg}
     </div>
   `;
 }
