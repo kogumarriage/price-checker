@@ -11,7 +11,6 @@
 
 <title>こぐまりっじ お買い物比較</title>
 
-<!-- アイコン -->
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 
@@ -19,7 +18,7 @@
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont;
+  font-family: -apple-system;
   background: linear-gradient(135deg, #ffe4ec, #fff6f9);
   margin: 0;
   padding-bottom: env(safe-area-inset-bottom);
@@ -49,7 +48,6 @@ input, select {
   margin-bottom: 10px;
   border-radius: 10px;
   border: 1px solid #ddd;
-  box-sizing: border-box;
   font-size: 16px;
 }
 
@@ -62,7 +60,6 @@ button {
   border-radius: 12px;
   font-size: 18px;
   font-weight: bold;
-  -webkit-tap-highlight-color: transparent;
 }
 
 button:active {
@@ -72,19 +69,25 @@ button:active {
 .result {
   display: none;
   background: white;
-  padding: 15px;
+  padding: 20px;
   border-radius: 16px;
   text-align: center;
+  animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .highlight {
-  font-size: 20px;
+  font-size: 24px;
   color: #ff4d6d;
   font-weight: bold;
 }
 
 .kuma {
-  font-size: 40px;
+  font-size: 42px;
 }
 
 video {
@@ -112,7 +115,7 @@ video {
 <option value="1000">L</option>
 </select>
 <input id="aPrice" placeholder="価格（円）">
-<button onclick="startCamera('a')">📷 撮影</button>
+<button onclick="startCamera('a')">📷 値札を撮影</button>
 </div>
 
 <div class="card">
@@ -126,7 +129,7 @@ video {
 <option value="1000">L</option>
 </select>
 <input id="bPrice" placeholder="価格（円）">
-<button onclick="startCamera('b')">📷 撮影</button>
+<button onclick="startCamera('b')">📷 値札を撮影</button>
 </div>
 
 <video id="camera" autoplay></video>
@@ -145,15 +148,15 @@ let stream;
 function startCamera(target) {
   currentTarget = target;
   navigator.mediaDevices.getUserMedia({
-  video: { facingMode: "environment" }
-})
-    .then(s => {
-      stream = s;
-      camera.style.display = "block";
-      camera.srcObject = s;
-      captureBtn.style.display = "block";
-    })
-    .catch(() => alert("カメラが使えません"));
+    video: { facingMode: "environment" }
+  })
+  .then(s => {
+    stream = s;
+    camera.style.display = "block";
+    camera.srcObject = s;
+    captureBtn.style.display = "block";
+  })
+  .catch(() => alert("カメラが使えません"));
 }
 
 function capture() {
@@ -184,8 +187,22 @@ function per100(price, qty, unit) {
 }
 
 function compare() {
-  const a = calc(aPrice.value, aQty.value, aUnit.value);
-  const b = calc(bPrice.value, bQty.value, bUnit.value);
+  const aPriceVal = Number(aPrice.value);
+  const aQtyVal = Number(aQty.value);
+  const aUnitVal = Number(aUnit.value);
+
+  const bPriceVal = Number(bPrice.value);
+  const bQtyVal = Number(bQty.value);
+  const bUnitVal = Number(bUnit.value);
+
+  if (!aPriceVal || !aQtyVal || !bPriceVal || !bQtyVal) {
+    result.style.display = "block";
+    result.innerHTML = "⚠️ 数値を入力してください";
+    return;
+  }
+
+  const a = calc(aPriceVal, aQtyVal, aUnitVal);
+  const b = calc(bPriceVal, bQtyVal, bUnitVal);
 
   const diff = Math.abs(a - b);
   const percent = (diff / Math.max(a, b)) * 100;
@@ -194,28 +211,36 @@ function compare() {
   let kumaMsg = "";
 
   if (a < b) {
-    message = `商品Aが約 ${percent.toFixed(1)}% お得`;
-    kumaMsg = "Aのほうがいいくま🐻";
+    message = "商品Aが圧倒的にお得！";
+    kumaMsg = "Aに決まりくま🐻";
   } else {
-    message = `商品Bが約 ${percent.toFixed(1)}% お得`;
+    message = "商品Bが圧倒的にお得！";
     kumaMsg = "Bがおすすめくま🐻";
   }
 
   result.style.display = "block";
 
   result.innerHTML = `
-    <div class="kuma">🧸🎩</div><br>
+    <div class="kuma">🧸🎩</div>
 
-    A単価：${a.toFixed(2)} 円<br>
-    B単価：${b.toFixed(2)} 円<br><br>
+    <div class="highlight">
+      🔥 ${message}
+    </div>
 
-    A（100g）：${per100(aPrice.value, aQty.value, aUnit.value).toFixed(1)} 円<br>
-    B（100g）：${per100(bPrice.value, bQty.value, bUnit.value).toFixed(1)} 円<br><br>
+    <div style="font-size:18px; margin:10px 0;">
+      👉 ${diff.toFixed(0)}円 安い<br>
+      👉 約 ${percent.toFixed(1)}% お得
+    </div>
 
-    差額：${diff.toFixed(2)} 円<br><br>
+    <hr>
 
-    <div class="highlight">${message}</div><br>
-    ${kumaMsg}
+    <div style="font-size:14px; color:#666;">
+      A：${a.toFixed(2)} 円 / B：${b.toFixed(2)} 円
+    </div>
+
+    <div style="margin-top:10px;">
+      ${kumaMsg}
+    </div>
   `;
 }
 </script>
