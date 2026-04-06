@@ -12,8 +12,6 @@
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2"></script>
-
 <style>
 body {
   font-family: -apple-system;
@@ -86,12 +84,6 @@ button {
 .kuma {
   font-size: 42px;
 }
-
-video {
-  width: 100%;
-  border-radius: 10px;
-  display: none;
-}
 </style>
 </head>
 
@@ -112,7 +104,6 @@ video {
 <option value="1000">L</option>
 </select>
 <input id="aPrice" placeholder="価格（円）">
-<button onclick="startCamera('a')">📷 値札を撮影</button>
 </div>
 
 <div class="card">
@@ -126,11 +117,7 @@ video {
 <option value="1000">L</option>
 </select>
 <input id="bPrice" placeholder="価格（円）">
-<button onclick="startCamera('b')">📷 値札を撮影</button>
 </div>
-
-<video id="camera" autoplay></video>
-<button id="captureBtn" onclick="capture()" style="display:none;">📸 撮影</button>
 
 <button onclick="compare()">比較する</button>
 
@@ -139,39 +126,6 @@ video {
 </div>
 
 <script>
-let currentTarget = "";
-let stream;
-
-function startCamera(target) {
-  currentTarget = target;
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" }
-  }).then(s => {
-    stream = s;
-    camera.style.display = "block";
-    camera.srcObject = s;
-    captureBtn.style.display = "block";
-  });
-}
-
-function capture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = camera.videoWidth;
-  canvas.height = camera.videoHeight;
-  canvas.getContext("2d").drawImage(camera, 0, 0);
-
-  Tesseract.recognize(canvas, 'eng').then(({ data: { text } }) => {
-    const nums = text.match(/\d+/g);
-    if (nums) {
-      document.getElementById(currentTarget + "Price").value = nums[0];
-    }
-  });
-
-  stream.getTracks().forEach(track => track.stop());
-  camera.style.display = "none";
-  captureBtn.style.display = "none";
-}
-
 function calc(price, qty, unit) {
   return price / (qty * unit);
 }
@@ -197,7 +151,6 @@ function compare() {
   const rawDiff = Math.abs(a - b);
   const percent = (rawDiff / Math.max(a, b)) * 100;
 
-  // ★ 完全一致判定（誤差対応）
   if (rawDiff < 0.0001) {
     result.style.display = "block";
     result.innerHTML = `
@@ -207,7 +160,6 @@ function compare() {
     return;
   }
 
-  // ★ 表示用差額（最低0.01円）
   let displayDiff = rawDiff < 0.01 ? 0.01 : rawDiff;
 
   let message = "";
